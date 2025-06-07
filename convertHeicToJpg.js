@@ -1,22 +1,23 @@
+// main-script.js
 const fs = require('fs');
 const path = require('path');
 const fse = require('fs-extra');
-const heicConvert = require('heic-convert');
 const fileType = require('file-type');
+const { execFile } = require('child_process');
+const util = require('util');
+const execFileAsync = util.promisify(execFile);
+
 const monthNames = [
   'NO-MONTH', 'JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE',
   'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'
 ];
-const month = monthNames[12];
+const month = monthNames[4];
 
-const SOURCE_DIR = `/Users/omher/Downloads/OMER_PHOTOS_24_23/2024/sorted-by-month/${month}`;    // Change to your source folder
-// const SOURCE_DIR = './heic-files';    // Change to your source folder
-const OUTPUT_DIR = `/Users/omher/Downloads/OMER_PHOTOS_24_23/2024/sorted-by-month/${month}-CONVERTED`;    // Output folder
-// const OUTPUT_DIR = './jpg-output';    // Output folder
+const SOURCE_DIR = `/Users/omher/Downloads/OMER_PHOTOS_24_23/25_FROM_CODE/sorted-by-month/${month}`;
+const OUTPUT_DIR = `/Users/omher/Downloads/OMER_PHOTOS_24_23/25_FROM_CODE/sorted-by-month/${month}-CONVERTED`;
 
 async function processFiles() {
   await fse.ensureDir(OUTPUT_DIR);
-
   const files = await fs.promises.readdir(SOURCE_DIR);
 
   for (const file of files) {
@@ -27,27 +28,25 @@ async function processFiles() {
       const inputBuffer = await fs.promises.readFile(inputPath);
 
       if (ext === '.heic') {
-        // Validate file type of .heic files
         const type = await fileType.fromBuffer(inputBuffer);
-
         if (!type) {
           console.warn(`⚠️ Skipped ${file}: Unknown file type`);
           continue;
         }
 
         if (type.ext === 'heic') {
-          // Convert HEIC → JPG
+          // Call convert-heic.js as a subprocess
           const outputFile = path.join(OUTPUT_DIR, path.basename(file, ext) + '.jpg');
-          const outputBuffer = await heicConvert({
-            buffer: inputBuffer,
-            format: 'JPEG',
-            quality: 1,
-          });
-          await fs.promises.writeFile(outputFile, outputBuffer);
-          console.log(`✅ Converted HEIC: ${file} → ${path.basename(outputFile)}`);
+
+          try {
+            await execFileAsync('node', ['convert-heic.js', inputPath, outputFile]);
+            console.log(`✅ Converted HEIC (child): ${file} → ${path.basename(outputFile)}`);
+          } catch (childErr) {
+            console.error(`❌ Child conversion failed for ${file}: ${childErr.message}`);
+          }
 
         } else {
-          // Move misnamed HEIC (e.g. actually jpg) with correct extension
+          // Misnamed file (not really HEIC)
           const correctedName = path.basename(file, ext) + '.' + type.ext;
           const outputFile = path.join(OUTPUT_DIR, correctedName);
           await fse.move(inputPath, outputFile, { overwrite: true });
@@ -55,7 +54,6 @@ async function processFiles() {
         }
 
       } else {
-        // For all other files (MOV, JPG, PNG, etc) just copy as is
         const outputFile = path.join(OUTPUT_DIR, file);
         await fse.copy(inputPath, outputFile, { overwrite: true });
         console.log(`📄 Copied: ${file}`);
@@ -68,5 +66,6 @@ async function processFiles() {
 
   console.log(`\n🎉 All done Month: ${month}!`);
 }
+
 console.log(`📷 Start Photos from Month: ${month}\n`);
 processFiles();

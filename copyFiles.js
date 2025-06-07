@@ -2,15 +2,15 @@ const fs = require('fs');
 const path = require('path');
 
 // ✅ Set correct root path: adjust if your folder is actually Downloads/2024/2024
-const rootFolder = path.join(__dirname);
-const output2023 = path.join(__dirname, '2023');
-const output2024 = path.join(__dirname, '2024');
+const rootFolder = '/Users/omher/Downloads/2025'
+const output2025 = '/Users/omher/Downloads/OMER_PHOTOS_24_23/25_FROM_CODE'
 
 const photoExtensions = ['.HEIC', '.JPG', '.JPEG', '.PNG', '.MP4'];
 
 // ✅ Ensure output folders exist
-if (!fs.existsSync(output2023)) fs.mkdirSync(output2023);
-if (!fs.existsSync(output2024)) fs.mkdirSync(output2024);
+// if (!fs.existsSync(output2023)) fs.mkdirSync(output2023);
+// if (!fs.existsSync(output2024)) fs.mkdirSync(output2024);
+if (!fs.existsSync(output2025)) fs.mkdirSync(output2025);
 
 function copyFile(sourcePath, targetFolder) {
   const originalName = path.basename(sourcePath);
@@ -52,7 +52,7 @@ function processYearFolder(takeoutFolder, year) {
     return;
   }
 
-  const targetFolder = year === 2023 ? output2023 : output2024;
+  const targetFolder = output2025;
   console.log(`    📸 Found ${mediaFiles.length} media files`);
 
   mediaFiles.forEach(file => {
@@ -63,7 +63,7 @@ function processYearFolder(takeoutFolder, year) {
 
 console.log(`🚀 Starting photo collection from: ${rootFolder}`);
 
-for (let i = 20; i >= 1; i--) {
+for (let i = 10; i >= 1; i--) {
   const folderName = `Takeout ${i}`;
   const takeoutPath = path.join(rootFolder, folderName);
 
@@ -73,11 +73,10 @@ for (let i = 20; i >= 1; i--) {
   }
 
   console.log(`\n📂 Processing: ${folderName}`);
-  processYearFolder(folderName, 2023);
-  processYearFolder(folderName, 2024);
+  processYearFolder(folderName, 2025);
 }
 
-console.log(`\n✅ Done! All available media files have been copied.`);
+// console.log(`\n✅ Done! All available media files have been copied.`);
 
 
 

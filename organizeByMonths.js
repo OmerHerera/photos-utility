@@ -3,7 +3,7 @@ const path = require('path');
 const fse = require('fs-extra');
 const { exiftool } = require('exiftool-vendored');
 
-const SOURCE_DIR = '/Users/omher/Downloads/2024/2023'; // 🔄 Change to your folder
+const SOURCE_DIR = '/Users/omher/Downloads/OMER_PHOTOS_24_23/25_FROM_CODE'; // 🔄 Change to your folder
 const DEST_DIR = './sorted-by-month';
 
 const monthNames = [
